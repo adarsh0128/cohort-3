@@ -1,4 +1,7 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
+
+const JWT_SECRET = "mainhijantahu";
 
 const app = express();
 
@@ -107,7 +110,8 @@ app.post("/signin", (req, res) => {
   );
 
   if (user) {
-    const token = generateToken();
+    const token = jwt.sign({ username: user.username }, JWT_SECRET);
+
     user.token = token;
     res.send({ token });
     console.log(user);
@@ -118,7 +122,9 @@ app.post("/signin", (req, res) => {
 
 app.get("/me", (req, res) => {
   const token = req.headers.token;
-  const user = users.find((user) => user.token === token);
+  const userDetails = jwt.verify(token, JWT_SECRET);
+  const username = userDetails.username;
+  const user = users.find((user) => user.username === username);
 
   if (user) {
     res.send({ username: user.username });
